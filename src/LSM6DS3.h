@@ -33,6 +33,8 @@
 #define LSM6DS3_CTRL7_G            0X16
 #define LSM6DS3_CTRL8_XL           0X17
 
+#define LSM6DS3_OUT_TEMP_L         0X20
+
 #define LSM6DS3_OUTX_L_G           0X22
 #define LSM6DS3_OUTX_H_G           0X23
 #define LSM6DS3_OUTY_L_G           0X24
@@ -68,6 +70,10 @@ class LSM6DS3Class {
     virtual float gyroscopeSampleRate(); // Sampling rate of the sensor.
     virtual int gyroscopeAvailable(); // Check for available data from gyroscope
 
+    // Temperature Sensor
+    virtual int readTemperature(float& t); // Results are in deg. C
+    virtual float temperatureSampleRate(); // Sampling rate of the sensor.
+    virtual int temperatureAvailable(); // Check for available data from temperature sensor
 
   protected:
     int readRegister(uint8_t address);

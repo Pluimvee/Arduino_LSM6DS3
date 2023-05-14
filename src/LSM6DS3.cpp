@@ -19,6 +19,7 @@
 
 #include "LSM6DS3.h"
 
+///////////////////////////////////////////////////////////////////////////////////////////
 LSM6DS3Class::LSM6DS3Class(TwoWire& wire, uint8_t slaveAddress) :
   _wire(&wire),
   _spi(NULL),
@@ -39,6 +40,9 @@ LSM6DS3Class::~LSM6DS3Class()
 {
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/// @brief 
+/// @return 
 int LSM6DS3Class::begin()
 {
   if (_spi != NULL) {
@@ -70,6 +74,8 @@ int LSM6DS3Class::begin()
   return 1;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/// @brief 
 void LSM6DS3Class::end()
 {
   if (_spi != NULL) {
@@ -83,6 +89,13 @@ void LSM6DS3Class::end()
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+/// @brief Reading acceleration in gravity units (1.0 = 9.81m/s2)
+/// @param x 
+/// @param y 
+/// @param z 
+/// @return 1 on success
 int LSM6DS3Class::readAcceleration(float& x, float& y, float& z)
 {
   int16_t data[3];
@@ -91,10 +104,8 @@ int LSM6DS3Class::readAcceleration(float& x, float& y, float& z)
     x = NAN;
     y = NAN;
     z = NAN;
-
     return 0;
   }
-
   x = data[0] * 4.0 / 32768.0;
   y = data[1] * 4.0 / 32768.0;
   z = data[2] * 4.0 / 32768.0;
@@ -102,20 +113,32 @@ int LSM6DS3Class::readAcceleration(float& x, float& y, float& z)
   return 1;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/// @brief 
+/// @return 
 int LSM6DS3Class::accelerationAvailable()
 {
   if (readRegister(LSM6DS3_STATUS_REG) & 0x01) {
     return 1;
   }
-
   return 0;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/// @brief 
+/// @return 
 float LSM6DS3Class::accelerationSampleRate()
 {
   return 104.0F;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+/// @brief Reading rotation
+/// @param x 
+/// @param y 
+/// @param z 
+/// @return 
 int LSM6DS3Class::readGyroscope(float& x, float& y, float& z)
 {
   int16_t data[3];
@@ -135,12 +158,14 @@ int LSM6DS3Class::readGyroscope(float& x, float& y, float& z)
   return 1;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/// @brief 
+/// @return 
 int LSM6DS3Class::gyroscopeAvailable()
 {
   if (readRegister(LSM6DS3_STATUS_REG) & 0x02) {
     return 1;
   }
-
   return 0;
 }
 
@@ -149,6 +174,45 @@ float LSM6DS3Class::gyroscopeSampleRate()
   return 104.0F;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+/// @brief Reading the temperature in degrees C
+/// @param temperature
+/// @return 1 if success
+int LSM6DS3Class::readTemperature(float& t)
+{
+  int16_t data[1];
+
+  if (!readRegisters(LSM6DS3_OUT_TEMP_L, (uint8_t*)data, sizeof(data))) {
+    t = NAN;
+
+    return 0;
+  }
+  t = data[0] / 16.0 + 25;
+
+  return 1;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/// @brief Determine if temperature can be retrieved
+/// @return 1 if value is available
+int LSM6DS3Class::temperatureAvailable()
+{
+  if (readRegister(LSM6DS3_STATUS_REG) & 0x04) {
+    return 1;
+  }
+  return 0;
+}
+
+float LSM6DS3Class::temperatureSampleRate()
+{
+  return 52.0F;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+/// @brief Protected method to read a register
+/// @param address 
+/// @return value read or -1 on failure
 int LSM6DS3Class::readRegister(uint8_t address)
 {
   uint8_t value;
@@ -160,6 +224,12 @@ int LSM6DS3Class::readRegister(uint8_t address)
   return value;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/// @brief Read a bytestring from the registers
+/// @param address 
+/// @param data 
+/// @param length 
+/// @return 
 int LSM6DS3Class::readRegisters(uint8_t address, uint8_t* data, size_t length)
 {
   if (_spi != NULL) {
@@ -176,11 +246,9 @@ int LSM6DS3Class::readRegisters(uint8_t address, uint8_t* data, size_t length)
     if (_wire->endTransmission(false) != 0) {
       return -1;
     }
-
     if (_wire->requestFrom(_slaveAddress, length) != length) {
       return 0;
     }
-
     for (size_t i = 0; i < length; i++) {
       *data++ = _wire->read();
     }
@@ -188,6 +256,11 @@ int LSM6DS3Class::readRegisters(uint8_t address, uint8_t* data, size_t length)
   return 1;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
+/// @brief Write value to one register
+/// @param address 
+/// @param value 
+/// @return 
 int LSM6DS3Class::writeRegister(uint8_t address, uint8_t value)
 {
   if (_spi != NULL) {
@@ -208,6 +281,7 @@ int LSM6DS3Class::writeRegister(uint8_t address, uint8_t value)
   return 1;
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////
 #ifdef ARDUINO_AVR_UNO_WIFI_REV2
   LSM6DS3Class IMU(SPI, SPIIMU_SS, SPIIMU_INT);
 #else
